@@ -77,7 +77,7 @@ class TestCharm(unittest.TestCase):
             '    gNB_name  =  "oai-du-rfsim";\n\n'
             "    // Tracking area code, 0x0000 and 0xfffe are reserved values\n"
             "    tracking_area_code  =  1;\n"
-            "    plmn_list = ({ mcc = 208; mnc = 99; mnc_length =2; snssaiList = ({ sst = 1, sd = 0x0027db }) });\n\n\n"  # noqa: E501, W505
+            "    plmn_list = ({ mcc = 208; mnc = 99; mnc_length =2; snssaiList = ({ sst = 1, sd = 0x000001 }) });\n\n\n"  # noqa: E501, W505
             "    nr_cellid = 12345678L;\n\n"
             "    ////////// Physical parameters:\n\n"
             "    min_rxtxtime                                              = 6;\n"
