@@ -118,7 +118,7 @@ class Oai5GDUOperatorCharm(CharmBase):
         """
         self._container.add_layer("du", self._pebble_layer, combine=True)
         self._container.replan()
-        self.unit.status = ActiveStatus()
+        self._container.restart(self._service_name)
 
     @property
     def _f1_relation_created(self) -> bool:
