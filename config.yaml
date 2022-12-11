@@ -1,0 +1,31 @@
+options:
+  mcc:
+    type: string
+    description: |
+      The Mobile Country Code (MCC) of the AMF.
+    default: "208"
+    required: true
+  mnc:
+    type: string
+    description: |
+      The Mobile Network Code (MNC) of the AMF.
+    default: "99"
+    required: true
+  mnc-length:
+    type: string
+    description: |
+      The length of the Mobile Network Code (MNC) of the AMF.
+    default: "2"
+    required: true
+  nssai-sst:
+    type: string
+    description: |
+      The Slice Service Type (SST) of the AMF.
+    default: "1"
+    required: true
+  nssai-sd:
+    type: string
+    description: |
+      The Slice Differentiator of the AMF.
+    default: "0027db"
+    required: true
