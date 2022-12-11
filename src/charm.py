@@ -13,7 +13,7 @@ from charms.observability_libs.v1.kubernetes_service_patch import (  # type: ign
     ServicePort,
 )
 from jinja2 import Environment, FileSystemLoader
-from ops.charm import CharmBase, ConfigChangedEvent, InstallEvent
+from ops.charm import CharmBase, ConfigChangedEvent, InstallEvent, RelationJoinedEvent
 from ops.main import main
 from ops.model import ActiveStatus, BlockedStatus, WaitingStatus
 
@@ -68,6 +68,21 @@ class Oai5GDUOperatorCharm(CharmBase):
         self.framework.observe(self.on.install, self._on_install)
         self.framework.observe(self.on.config_changed, self._on_config_changed)
         self.framework.observe(self.on.fiveg_f1_relation_changed, self._on_config_changed)
+        self.framework.observe(self.on.fiveg_f1_relation_joined, self._on_f1_relation_joined)
+
+    def _on_f1_relation_joined(self, event: RelationJoinedEvent) -> None:
+        if not self.unit.is_leader():
+            return
+        du_hostname, du_ipv4_address = self.kubernetes.get_service_load_balancer_address(
+            name=self.app.name
+        )
+        if not du_ipv4_address:
+            raise Exception("Loadbalancer doesn't have an IP address")
+        self.f1_requires.set_du_information(
+            du_address=du_ipv4_address,
+            du_port=self._config_f1_du_port,
+            relation_id=event.relation.id,
+        )
 
     def _on_install(self, event: InstallEvent) -> None:
         """Triggered on install event.
