@@ -13,6 +13,7 @@ from lightkube.models.core_v1 import (
 )
 from lightkube.models.core_v1 import ServiceStatus as K8sServiceStatus
 from ops.model import ActiveStatus
+from ops.pebble import ServiceInfo, ServiceStartup, ServiceStatus
 from ops.testing import Harness
 
 from charm import Oai5GDUOperatorCharm
@@ -311,3 +312,32 @@ class TestCharm(unittest.TestCase):
         service = self.harness.model.unit.get_container("du").get_service("du")
         self.assertTrue(service.is_running())
         self.assertEqual(self.harness.model.unit.status, ActiveStatus())
+
+    @patch("lightkube.Client.get")
+    @patch("ops.model.Container.get_service")
+    def test_given_unit_is_leader_when_f1_relation_joined_then_du_relation_data_is_set(
+        self, patch_get_service, patch_k8s_get
+    ):
+        load_balancer_ip = "5.6.7.8"
+        patch_k8s_get.return_value = Service(
+            spec=ServiceSpec(type="LoadBalancer"),
+            status=K8sServiceStatus(
+                loadBalancer=LoadBalancerStatus(ingress=[LoadBalancerIngress(ip=load_balancer_ip)])
+            ),
+        )
+        self.harness.set_leader(True)
+        self.harness.set_can_connect(container="du", val=True)
+        patch_get_service.return_value = ServiceInfo(
+            name="du",
+            current=ServiceStatus.ACTIVE,
+            startup=ServiceStartup.ENABLED,
+        )
+
+        relation_id = self.harness.add_relation(relation_name="fiveg-f1", remote_app="du")
+        self.harness.add_relation_unit(relation_id=relation_id, remote_unit_name="du/0")
+
+        relation_data = self.harness.get_relation_data(
+            relation_id=relation_id, app_or_unit=self.harness.model.app.name
+        )
+
+        assert relation_data["du_address"] == load_balancer_ip
